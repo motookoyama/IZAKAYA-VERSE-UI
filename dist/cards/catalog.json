@@ -1,0 +1,41 @@
+[
+    {
+        "id": "official-001",
+        "name": "Master (Sample)",
+        "type": "character",
+        "description": "IZAKAYAのマスター。基本的な会話テスト用。",
+        "image": "/verse/cards/official/master.png",
+        "fileName": "master.png",
+        "tags": [
+            "Official",
+            "Male",
+            "Staff"
+        ]
+    },
+    {
+        "id": "official-002",
+        "name": "Cyber City (World)",
+        "type": "world",
+        "description": "ネオン輝く近未来都市。世界観テスト用。",
+        "image": "/verse/cards/official/cyber_city.png",
+        "fileName": "cyber_city.png",
+        "tags": [
+            "Sci-Fi",
+            "City",
+            "Background"
+        ]
+    },
+    {
+        "id": "official-003",
+        "name": "Mystery Plot (Story)",
+        "type": "plot",
+        "description": "不可解な事件の導入プロット。",
+        "image": "/verse/cards/official/plot_artifact.png",
+        "fileName": "plot_artifact.png",
+        "tags": [
+            "Mystery",
+            "Suspense",
+            "Scenario"
+        ]
+    }
+]
