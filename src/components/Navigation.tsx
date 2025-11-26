@@ -27,8 +27,7 @@ const Navigation = () => {
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/play', icon: Gamepad2, label: 'Play' },
-    { path: '/dock', icon: Library, label: 'Card Dock' }, // Replaced Library or added new? Let's add new or replace. Plan said "Card Dock".
-    { path: '/library', icon: Library, label: 'Library' },
+    { path: '/dock', icon: Library, label: 'Card Dock' },
     { path: '/tickets', icon: Ticket, label: 'Tickets' },
     { path: '/redeem', icon: Gift, label: 'Redeem' },
   ];

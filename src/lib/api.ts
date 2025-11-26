@@ -84,6 +84,9 @@ export const api = {
     async consumePoints(uid: string, amount: number, sku: string): Promise<any> {
         return apiFetch("/wallet/consume", {
             method: "POST",
+            headers: {
+                "X-IZK-UID": uid,
+            },
             body: JSON.stringify({
                 uid,
                 amount_pt: amount,

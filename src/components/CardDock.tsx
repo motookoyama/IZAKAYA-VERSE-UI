@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Download, Tag, Database } from 'lucide-react';
+import { Download, Tag, Database, ExternalLink, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { api } from '../lib/api';
 
 interface DockCard {
     id: string;
@@ -19,7 +20,7 @@ export default function CardDock() {
 
     useEffect(() => {
         // Load card catalog from JSON
-        fetch('/verse/cards/catalog.json')
+        fetch('/cards/catalog.json')
             .then(res => res.json())
             .then(data => {
                 setCards(data);
@@ -40,13 +41,52 @@ export default function CardDock() {
         // Ensure the path is correct relative to the public directory
         // If image path in JSON is absolute (starts with /verse/), use it directly
         // Otherwise assume it's in official folder
-        const downloadUrl = card.image.startsWith('/') ? card.image : `/verse/cards/official/${card.fileName}`;
+        const downloadUrl = card.image.startsWith('/') ? card.image : `/cards/official/${card.fileName}`;
 
         link.href = downloadUrl;
         link.download = card.fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleOpenSatellite = async () => {
+        const SATELLITE_URL = 'https://copy-of-metacapture-2-0-95139013565.us-west1.run.app';
+        const COST = 50;
+        const DAILY_LIMIT = 5;
+        const uid = 'verse-user'; // TODO: Use actual UID
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = `metacapture_daily_count_${today}_${uid}`;
+
+        // Check daily limit
+        const currentCount = parseInt(localStorage.getItem(storageKey) || '0', 10);
+        if (currentCount >= DAILY_LIMIT) {
+            alert(`1日の生成上限（${DAILY_LIMIT}回）に達しました。明日またお試しください。`);
+            return;
+        }
+
+        // Confirm with user
+        if (!confirm(`MetaCapture 2.0 (衛星アプリ) を起動しますか？\n\n消費ポイント: ${COST}pt\n本日の残り回数: ${DAILY_LIMIT - currentCount}回`)) {
+            return;
+        }
+
+        try {
+            // Consume points
+            await api.consumePoints(uid, COST, 'metacapture_v2_generation');
+
+            // Update local count
+            localStorage.setItem(storageKey, (currentCount + 1).toString());
+
+            // Open Satellite App
+            window.open(SATELLITE_URL, '_blank');
+        } catch (error: any) {
+            console.error('Failed to consume points:', error);
+            if (error.message.includes('insufficient_balance')) {
+                alert('ポイントが不足しています。');
+            } else {
+                alert('エラーが発生しました。もう一度お試しください。');
+            }
+        }
     };
 
     return (
@@ -59,6 +99,28 @@ export default function CardDock() {
                 <p className="text-slate-400 mt-2">
                     公式配布カード倉庫。ここからPNGをダウンロードして、Verseにインポートできます。
                 </p>
+
+                <div className="mt-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h3 className="font-bold text-emerald-400 flex items-center gap-2">
+                            <ExternalLink size={18} />
+                            MetaCapture 2.0 (Satellite App)
+                        </h3>
+                        <p className="text-sm text-slate-400 mt-1">
+                            衛星軌道上のAI生成モジュールにアクセスし、新しいV2カードを生成します。
+                        </p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                            <span className="flex items-center gap-1"><Tag size={12} /> Cost: 50pt / 回</span>
+                            <span className="flex items-center gap-1"><AlertTriangle size={12} /> Limit: 5回 / 日</span>
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleOpenSatellite}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20 whitespace-nowrap"
+                    >
+                        衛星アプリを起動
+                    </button>
+                </div>
             </header>
 
             {/* Tabs */}
@@ -68,8 +130,8 @@ export default function CardDock() {
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                             }`}
                     >
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -102,8 +164,8 @@ export default function CardDock() {
                                 />
                                 <div className="absolute top-2 right-2">
                                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${card.type === 'character' ? 'bg-blue-500/80 text-blue-50' :
-                                            card.type === 'world' ? 'bg-purple-500/80 text-purple-50' :
-                                                'bg-amber-500/80 text-amber-50'
+                                        card.type === 'world' ? 'bg-purple-500/80 text-purple-50' :
+                                            'bg-amber-500/80 text-amber-50'
                                         }`}>
                                         {card.type}
                                     </span>
