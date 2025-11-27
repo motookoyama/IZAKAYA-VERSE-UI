@@ -95,4 +95,23 @@ export const api = {
             }),
         });
     },
+
+    async getMetaCaptureLink(
+        uid: string,
+        content: string,
+        mode: string,
+        auto: boolean = false
+    ): Promise<{ ok: boolean; url: string; cost: number }> {
+        return apiFetch("/api/v2/metacapture_link", {
+            method: "POST",
+            headers: {
+                "X-IZK-UID": uid,
+            },
+            body: JSON.stringify({
+                content,
+                mode,
+                auto,
+            }),
+        });
+    },
 };

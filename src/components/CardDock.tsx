@@ -18,6 +18,11 @@ export default function CardDock() {
     const [cards, setCards] = useState<DockCard[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // MetaCapture State
+    const [mcPrompt, setMcPrompt] = useState('');
+    const [mcMode, setMcMode] = useState('CharacterCard');
+    const [isLaunching, setIsLaunching] = useState(false);
+
     useEffect(() => {
         // Load card catalog from JSON
         fetch('/cards/catalog.json')
@@ -51,7 +56,6 @@ export default function CardDock() {
     };
 
     const handleOpenSatellite = async () => {
-        const SATELLITE_URL = 'https://copy-of-metacapture-2-0-95139013565.us-west1.run.app';
         const COST = 50;
         const DAILY_LIMIT = 5;
         const uid = 'verse-user'; // TODO: Use actual UID
@@ -65,27 +69,40 @@ export default function CardDock() {
             return;
         }
 
-        // Confirm with user
-        if (!confirm(`MetaCapture 2.0 (衛星アプリ) を起動しますか？\n\n消費ポイント: ${COST}pt\n本日の残り回数: ${DAILY_LIMIT - currentCount}回`)) {
+        if (!mcPrompt.trim()) {
+            alert('生成したいキャラクターや世界観のイメージ（プロンプト）を入力してください。');
             return;
         }
 
+        // Confirm with user
+        if (!confirm(`MetaCapture 2.0 (衛星アプリ) を起動しますか？\n\n消費ポイント: ${COST}pt\n本日の残り回数: ${DAILY_LIMIT - currentCount}回\n\nモード: ${mcMode}\nプロンプト: ${mcPrompt}`)) {
+            return;
+        }
+
+        setIsLaunching(true);
+
         try {
-            // Consume points
-            await api.consumePoints(uid, COST, 'metacapture_v2_generation');
+            // Call Protocol Relay Endpoint
+            const response = await api.getMetaCaptureLink(uid, mcPrompt, mcMode, true);
 
-            // Update local count
-            localStorage.setItem(storageKey, (currentCount + 1).toString());
+            if (response.ok && response.url) {
+                // Update local count
+                localStorage.setItem(storageKey, (currentCount + 1).toString());
 
-            // Open Satellite App
-            window.open(SATELLITE_URL, '_blank');
+                // Open Satellite App with Protocol Relay URL
+                window.open(response.url, '_blank');
+            } else {
+                throw new Error('Invalid response from server');
+            }
         } catch (error: any) {
-            console.error('Failed to consume points:', error);
+            console.error('Failed to launch MetaCapture:', error);
             if (error.message.includes('insufficient_balance')) {
                 alert('ポイントが不足しています。');
             } else {
                 alert('エラーが発生しました。もう一度お試しください。');
             }
+        } finally {
+            setIsLaunching(false);
         }
     };
 
@@ -114,12 +131,39 @@ export default function CardDock() {
                             <span className="flex items-center gap-1"><AlertTriangle size={12} /> Limit: 5回 / 日</span>
                         </div>
                     </div>
-                    <button
-                        onClick={handleOpenSatellite}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20 whitespace-nowrap"
-                    >
-                        衛星アプリを起動
-                    </button>
+
+                    <div className="flex flex-col gap-3 w-full md:w-auto">
+                        <div className="flex gap-2">
+                            <select
+                                value={mcMode}
+                                onChange={(e) => setMcMode(e.target.value)}
+                                className="bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:border-emerald-500 outline-none"
+                            >
+                                <option value="CharacterCard">Character</option>
+                                <option value="WorldCard">World</option>
+                                <option value="StoryPlot">Story Plot</option>
+                            </select>
+                            <input
+                                type="text"
+                                value={mcPrompt}
+                                onChange={(e) => setMcPrompt(e.target.value)}
+                                placeholder="例: 銀髪の騎士、未来都市..."
+                                className="bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm w-full md:w-64 focus:border-emerald-500 outline-none"
+                            />
+                        </div>
+                        <button
+                            onClick={handleOpenSatellite}
+                            disabled={isLaunching || !mcPrompt.trim()}
+                            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20 whitespace-nowrap flex items-center justify-center gap-2"
+                        >
+                            {isLaunching ? (
+                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                            ) : (
+                                <ExternalLink size={18} />
+                            )}
+                            衛星アプリを起動
+                        </button>
+                    </div>
                 </div>
             </header>
 
