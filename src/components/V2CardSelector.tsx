@@ -1,26 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, User, Tag, Upload } from 'lucide-react';
-import { extractV2CardMetadataFromPng } from '../lib/png-metadata';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, User, Tag } from 'lucide-react';
 
-export interface V2Card {
+interface V2Card {
   id: string;
   title: string;
-  name: string;
+  name: string; // 追加
   description: string;
   image_url?: string;
-  character_data?: Record<string, any>;
+  character_data?: Record<string, any>; // any を修正
   tags: string[];
   created_at: string;
-  personality: string;
-  first_mes: string;
-  // Story Plot specific
-  plot_beats?: {
-    setup?: string;
-    conflict?: string;
-    twist?: string;
-    climax?: string;
-    resolution?: string;
-  };
+  personality: string; // 追加
+  first_mes: string; // 追加
 }
 
 interface V2CardSelectorProps {
@@ -33,7 +24,6 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // カード一覧取得
   useEffect(() => {
@@ -42,13 +32,11 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
 
   const fetchCards = async () => {
     try {
-      // Mock fetch for now, or replace with real API if available
-      // const response = await fetch('http://localhost:3001/api/v2cards');
-      // if (response.ok) {
-      //   const data = await response.json();
-      //   setCards(data.cards || []);
-      // }
-      setCards([]); // Start empty or with defaults
+      const response = await fetch('http://localhost:3001/api/v2cards');
+      if (response.ok) {
+        const data = await response.json();
+        setCards(data.cards || []);
+      }
     } catch (error) {
       console.error('Failed to fetch cards:', error);
     } finally {
@@ -56,53 +44,8 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const metadata = await extractV2CardMetadataFromPng(file);
-      if (metadata) {
-        const newCard: V2Card = {
-          id: metadata.id || Date.now().toString(),
-          title: metadata.name || file.name.replace(/\.png$/i, ""),
-          name: metadata.name || "Unknown",
-          description: metadata.description || metadata.creator_notes || "",
-          image_url: URL.createObjectURL(file),
-          character_data: metadata as any,
-          tags: metadata.tags || [],
-          created_at: new Date().toISOString(),
-          personality: metadata.personality || "",
-          first_mes: metadata.first_mes || "",
-          plot_beats: metadata.plot_beats,
-        };
-
-        // If it's a Story Plot (has plot_beats or story_plot tag), ensure it has a tag
-        if (metadata.plot_beats || (metadata.tags && metadata.tags.includes('story_plot'))) {
-          if (!newCard.tags.includes('Story Plot')) {
-            newCard.tags.push('Story Plot');
-          }
-        }
-
-        setCards(prev => [newCard, ...prev]);
-        onCardSelect(newCard);
-        setIsOpen(false);
-      } else {
-        alert("Failed to extract V2 Card metadata.");
-      }
-    } catch (error) {
-      console.error("Error importing card:", error);
-      alert("Error importing card.");
-    }
-
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
   // 検索フィルター
-  const filteredCards = cards.filter(card =>
+  const filteredCards = cards.filter(card => 
     card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (card.tags && card.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -119,7 +62,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
     const initials = card.title.substring(0, 2).toUpperCase();
     const colors = ['#3B82F6', '#8B5CF6', '#EF4444', '#10B981', '#F59E0B'];
     const color = colors[card.title.length % colors.length];
-
+    
     return (
       <svg width="32" height="32" viewBox="0 0 32 32" className="rounded-full">
         <rect width="32" height="32" fill={color} rx="16" />
@@ -170,38 +113,24 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
             </>
           )}
         </div>
-        <ChevronDown
-          size={20}
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        <ChevronDown 
+          size={20} 
+          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} 
         />
       </button>
 
       {/* ドロップダウンメニュー */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-hidden z-50">
-          {/* 検索バー & インポート */}
-          <div className="p-3 border-b border-gray-200 flex gap-2">
+          {/* 検索バー */}
+          <div className="p-3 border-b border-gray-200">
             <input
               type="text"
               placeholder="カードを検索..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 p-2 bg-gray-100 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 bg-gray-100 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="file"
-              accept="image/png"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              title="Import PNG Card"
-            >
-              <Upload size={20} />
-            </button>
           </div>
 
           {/* カードリスト */}
@@ -214,9 +143,6 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
             ) : filteredCards.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 {searchTerm ? '検索結果がありません' : 'カードがありません'}
-                <div className="mt-2 text-xs text-gray-400">
-                  PNGカードをインポートしてください
-                </div>
               </div>
             ) : (
               filteredCards.map((card) => (
@@ -236,7 +162,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
                     ) : (
                       generateSVGIcon(card)
                     )}
-
+                    
                     {/* テキスト情報 */}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-gray-800 truncate">
@@ -245,7 +171,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
                       <div className="text-sm text-gray-600 truncate">
                         {card.description}
                       </div>
-
+                      
                       {/* タグ */}
                       {card.tags && card.tags.length > 0 && (
                         <div className="flex gap-1 mt-1">

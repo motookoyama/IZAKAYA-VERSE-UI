@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState, useRef, useEffect } from 'react'
 import { Send, User, Bot, FileText, MessageCircle, Settings } from 'lucide-react'
-import { api } from '../lib/api'
 import V2CardSelector from './V2CardSelector'
 
 interface Message {
@@ -46,7 +45,7 @@ const Play = () => {
   // カード選択処理
   const handleCardSelect = (card: V2Card) => {
     setCurrentCard(card);
-
+    
     // 最初のメッセージを追加
     if (card.character_data?.first_mes || card.first_mes) {
       const firstMessage = card.character_data?.first_mes || card.first_mes;
@@ -64,7 +63,7 @@ const Play = () => {
     const initials = card.title.substring(0, 2).toUpperCase();
     const colors = ['#3B82F6', '#8B5CF6', '#EF4444', '#10B981', '#F59E0B'];
     const color = colors[card.title.length % colors.length];
-
+    
     return (
       <svg width="40" height="40" viewBox="0 0 40 40" className="rounded-full">
         <rect width="40" height="40" fill={color} rx="20" />
@@ -82,12 +81,9 @@ const Play = () => {
     );
   };
 
-  const [tension, setTension] = useState(50);
-  const [syncRate, setSyncRate] = useState(0);
-
   // メッセージ送信
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !currentCard) return
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -99,48 +95,16 @@ const Play = () => {
     setMessages(prev => [...prev, newMessage])
     setInputMessage('')
 
-    const startTime = Date.now();
-
-    try {
-      // API呼び出し
-      // TODO: 履歴の管理 (現在は履歴なしで送信)
-      const { reply } = await api.sendMessage(inputMessage, currentCard.id, [], tension);
-
-      const endTime = Date.now();
-      const latency = endTime - startTime;
-
-      // シンクロ率算出ロジック (ヒューリスティック)
-      // 1. 基本スコア: 50
-      // 2. 応答速度: 早いほど高い (最大+20) - 1000ms以下で満点
-      // 3. 応答長: 長いほど高い (最大+20) - 100文字以上で満点
-      // 4. ゆらぎ: -5 ~ +5
-
-      let newSyncRate = 50;
-      newSyncRate += Math.max(0, 20 - (latency / 100)); // 2000msで0点
-      newSyncRate += Math.min(20, reply.length / 5);
-      newSyncRate += (Math.random() * 10) - 5;
-
-      // 0-100の範囲に収める
-      newSyncRate = Math.min(100, Math.max(0, newSyncRate));
-      setSyncRate(Math.floor(newSyncRate));
-
+    // ボットの応答（モック）
+    setTimeout(() => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: reply,
+        content: `「${inputMessage}」について話しましょう。${currentCard?.name || 'キャラクター'}として応答します。`,
         timestamp: new Date()
       }
       setMessages(prev => [...prev, botResponse])
-    } catch (error) {
-      console.error('Chat error:', error);
-      const errorResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: 'エラーが発生しました。もう一度お試しください。',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorResponse])
-    }
+    }, 1000)
   }
 
   return (
@@ -158,16 +122,16 @@ const Play = () => {
               <MessageCircle size={24} className="text-blue-400" />
               <h1 className="text-xl font-bold text-white">IZAKAYA verse Chat</h1>
             </div>
-
+            
             <div className="flex items-center gap-4">
               {/* V2カード選択 */}
               <div className="w-80">
-                <V2CardSelector
+                <V2CardSelector 
                   onCardSelect={handleCardSelect}
                   selectedCard={currentCard}
                 />
               </div>
-
+              
               {/* 設定ボタン */}
               <button
                 onClick={() => setShowSettings(!showSettings)}
@@ -189,7 +153,7 @@ const Play = () => {
               className="w-80 bg-white bg-opacity-10 backdrop-blur-sm border-r border-white border-opacity-20 p-4"
             >
               <h3 className="text-lg font-semibold text-white mb-4">設定</h3>
-
+              
               {/* 現在のカード情報 */}
               {currentCard && (
                 <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-4">
@@ -208,7 +172,7 @@ const Play = () => {
                       <p className="text-sm text-gray-300">{currentCard.description}</p>
                     </div>
                   </div>
-
+                  
                   {/* タグ表示 */}
                   {currentCard.tags && currentCard.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
@@ -267,12 +231,13 @@ const Play = () => {
                           </div>
                         )}
                       </div>
-
+                      
                       {/* メッセージ */}
-                      <div className={`p-4 rounded-lg ${message.type === 'user'
-                          ? 'bg-blue-600 text-white'
+                      <div className={`p-4 rounded-lg ${
+                        message.type === 'user' 
+                          ? 'bg-blue-600 text-white' 
                           : 'bg-white bg-opacity-20 text-white'
-                        }`}>
+                      }`}>
                         <p className="text-sm leading-relaxed">{message.content}</p>
                         <p className="text-xs opacity-70 mt-2">
                           {message.timestamp.toLocaleTimeString()}
@@ -283,37 +248,6 @@ const Play = () => {
                 ))
               )}
               <div ref={messagesEndRef} />
-            </div>
-
-            {/* ゲージエリア */}
-            <div className="px-4 py-2 bg-black bg-opacity-20 backdrop-blur-sm flex items-center gap-6 border-t border-white border-opacity-10">
-              {/* シンクロ率ゲージ */}
-              <div className="flex items-center gap-2 w-1/3">
-                <span className="text-xs font-bold text-blue-300 whitespace-nowrap">SYNC RATE</span>
-                <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${syncRate}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-                <span className="text-xs font-mono text-cyan-300 w-8 text-right">{syncRate}%</span>
-              </div>
-
-              {/* テンションゲージ */}
-              <div className="flex items-center gap-2 w-1/3">
-                <span className="text-xs font-bold text-pink-300 whitespace-nowrap">TENSION</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={tension}
-                  onChange={(e) => setTension(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
-                />
-                <span className="text-xs font-mono text-pink-300 w-8 text-right">{tension}</span>
-              </div>
             </div>
 
             {/* 入力エリア */}

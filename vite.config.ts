@@ -4,10 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 1398, // ローカル開発用ポート
-  },
+  base: './', // GitHub Pagesで正しく動作するように追加
   build: {
-    outDir: 'dist', // 標準出力先
+    outDir: 'docs', // ビルド出力先を 'docs' ディレクトリに変更
   },
 })

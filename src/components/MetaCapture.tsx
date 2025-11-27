@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, FileText, Globe } from 'lucide-react';
+import { Image, FileText, Globe, ExternalLink } from 'lucide-react';
 
 interface V2CardData {
   name: string;
@@ -50,7 +50,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           url: url.trim(),
           prompt: urlPrompt.trim() || undefined
         }),
@@ -64,7 +64,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
 
       setCapturedCard(data.card_data);
       onCardCaptured?.(data.card_data);
-      
+
       console.log('✅ URLキャプチャー成功:', data.card_id);
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
@@ -89,7 +89,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           image_url: imageUrl.trim(),
           prompt: imagePrompt.trim() || undefined
         }),
@@ -103,7 +103,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
 
       setCapturedCard(data.card_data);
       onCardCaptured?.(data.card_data);
-      
+
       console.log('✅ 画像キャプチャー成功:', data.card_id);
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
@@ -128,7 +128,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           file_content: fileContent.trim(),
           file_format: fileFormat,
           prompt: filePrompt.trim() || undefined
@@ -143,7 +143,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
 
       setCapturedCard(data.card_data);
       onCardCaptured?.(data.card_data);
-      
+
       console.log('✅ ファイルキャプチャー成功:', data.card_id);
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
@@ -161,7 +161,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       setFileContent(content);
-      
+
       // ファイル形式を自動検出
       if (content.includes('name:') && content.includes('description:')) {
         setFileFormat('sAtd');
@@ -189,33 +189,30 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
       <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab('url')}
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'url'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`px-4 py-2 font-medium ${activeTab === 'url'
+            ? 'text-blue-600 border-b-2 border-blue-600'
+            : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           <Globe size={16} className="inline mr-2" />
           URL抽出
         </button>
         <button
           onClick={() => setActiveTab('image')}
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'image'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`px-4 py-2 font-medium ${activeTab === 'image'
+            ? 'text-blue-600 border-b-2 border-blue-600'
+            : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           <Image size={16} className="inline mr-2" />
           画像抽出
         </button>
         <button
           onClick={() => setActiveTab('file')}
-          className={`px-4 py-2 font-medium ${
-            activeTab === 'file'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`px-4 py-2 font-medium ${activeTab === 'file'
+            ? 'text-blue-600 border-b-2 border-blue-600'
+            : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           <FileText size={16} className="inline mr-2" />
           ファイル抽出
@@ -238,7 +235,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
               disabled={isCapturing}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               AI拡張プロンプト（オプション）
@@ -285,7 +282,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
               disabled={isCapturing}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               AI拡張プロンプト（オプション）
@@ -331,7 +328,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
               disabled={isCapturing}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               ファイル形式
@@ -346,7 +343,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
               <option value="sAtd">sAtd</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               ファイル内容（直接入力も可能）
@@ -359,7 +356,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
               disabled={isCapturing}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               AI拡張プロンプト（オプション）
@@ -396,7 +393,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             ✅ 抽出完了: {capturedCard.name}
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">基本情報</h4>
@@ -410,7 +407,7 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
                 <strong>最初のメッセージ:</strong> {capturedCard.first_mes}
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">詳細</h4>
               {capturedCard.scenario && (
@@ -441,7 +438,133 @@ const MetaCapture: React.FC<MetaCaptureProps> = ({ onCardCaptured }) => {
   );
 };
 
-export default MetaCapture;
+// --- Protocol Relay Integration ---
+import { api } from '../lib/api';
+
+const SatelliteAppSection: React.FC = () => {
+  const [mode, setMode] = useState('CharacterCard');
+  const [prompt, setPrompt] = useState('');
+  const [isLaunching, setIsLaunching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLaunch = async () => {
+    setIsLaunching(true);
+    setError(null);
+    try {
+      // TODO: Get real UID from auth context
+      const uid = 'user_12345';
+
+      // Check daily limit (Client-side check for UX)
+      const today = new Date().toISOString().split('T')[0];
+      const key = `metacapture_daily_count_${today}_${uid}`;
+      const count = parseInt(localStorage.getItem(key) || '0', 10);
+      if (count >= 5) {
+        throw new Error('本日の利用上限（5回）に達しました。明日またお試しください。');
+      }
+
+      if (!confirm(`50ポイントを消費してMetaCapture 2.0を起動しますか？\n(本日残り: ${5 - count}回)`)) {
+        setIsLaunching(false);
+        return;
+      }
+
+      const result = await api.callProtocol('metacapture', {
+        content: prompt,
+        mode,
+        auto: true
+      });
+
+      const { url } = result.payload;
+
+      // Update local count
+      localStorage.setItem(key, (count + 1).toString());
+
+      // Open Satellite App
+      window.open(url, '_blank', 'noopener,noreferrer');
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '起動に失敗しました');
+    } finally {
+      setIsLaunching(false);
+    }
+  };
+
+  return (
+    <div className="mt-8 bg-gray-900 text-white rounded-lg p-6 border border-purple-500 shadow-xl">
+      <h2 className="text-xl font-bold mb-4 flex items-center">
+        <Globe className="mr-2 text-purple-400" />
+        MetaCapture 2.0 (Satellite App)
+      </h2>
+
+      <p className="text-sm text-gray-400 mb-4">
+        外部の高性能生成アプリ「MetaCapture 2.0」を起動します。
+        <br />
+        消費: <span className="text-yellow-400 font-bold">50pt</span> / 回 (1日5回まで)
+      </p>
+
+      {error && (
+        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-2 rounded mb-4 text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-1">生成モード</label>
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+          >
+            <option value="CharacterCard">キャラクターカード (CharacterCard)</option>
+            <option value="WorldCard">ワールドカード (WorldCard)</option>
+            <option value="StoryPlot">ストーリープロット (StoryPlot)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-1">プロンプト (任意)</label>
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="例: サイバーパンクな忍者、猫耳の魔法使い..."
+            className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:border-purple-500 focus:outline-none"
+          />
+        </div>
+
+        <button
+          onClick={handleLaunch}
+          disabled={isLaunching}
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        >
+          {isLaunching ? (
+            <>
+              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+              起動中...
+            </>
+          ) : (
+            <>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              衛星アプリを起動 (50pt)
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Update main component to include the new section
+const MetaCaptureWithSatellite: React.FC<MetaCaptureProps> = (props) => {
+  return (
+    <div className="space-y-8">
+      <MetaCapture {...props} />
+      <SatelliteAppSection />
+    </div>
+  );
+};
+
+export default MetaCaptureWithSatellite;
 
 
 
