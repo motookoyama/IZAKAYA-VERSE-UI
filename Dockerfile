@@ -2,17 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files and install production dependencies (for server.js)
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Copy local built assets (docs) and server script
+# Copy local built assets (docs)
 COPY docs ./docs
-COPY server.cjs .
+
+# Install 'serve' package globally (lightweight static server)
+RUN npm install -g serve
 
 # Expose port 1398
 EXPOSE 1398
 ENV PORT=1398
 
-# Start the Node server
-CMD ["node", "server.cjs"]
+# Start server on port 1398, in SPA mode (-s)
+CMD ["serve", "-s", "docs", "-l", "1398"]
