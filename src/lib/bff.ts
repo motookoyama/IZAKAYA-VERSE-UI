@@ -4,5 +4,5 @@ export const resolveBffBase = () => {
         return 'http://localhost:4117';
     }
     // In production (Cloud Run), use the relative path or env var
-    return 'https://izakaya-bff-c-preview-gq6f2n6yxa-an.a.run.app';
+    return 'https://izakaya-bff-95139013565.asia-northeast1.run.app';
 };
