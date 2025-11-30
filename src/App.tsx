@@ -7,8 +7,6 @@ import Tickets from './components/Tickets'
 import Redeem from './components/Redeem'
 import Navigation from './components/Navigation'
 
-import MetaCapture from './components/MetaCapture'
-
 function App() {
   return (
     <Router>
@@ -22,7 +20,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/play" element={<Play />} />
-            <Route path="/metacapture" element={<MetaCapture />} />
             <Route path="/library" element={<Library />} />
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/redeem" element={<Redeem />} />

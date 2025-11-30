@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveBffBase } from '../lib/bff';
 
 interface V2CardData {
   name: string;
@@ -30,7 +31,8 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ onCardGenerated }) =>
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/gemini/generate-card', {
+      const bffBase = resolveBffBase();
+      const response = await fetch(`${bffBase}/api/gemini/generate-card`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +48,7 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ onCardGenerated }) =>
 
       setGeneratedCard(data.card_data);
       onCardGenerated?.(data.card_data);
-      
+
       // 成功メッセージ
       console.log('✅ V2カード生成成功:', data.card_id);
     } catch (err) {
@@ -72,7 +74,8 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ onCardGenerated }) =>
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch('http://localhost:3001/api/gemini/analyze-image', {
+      const bffBase = resolveBffBase();
+      const response = await fetch(`${bffBase}/api/gemini/analyze-image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +165,7 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ onCardGenerated }) =>
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             ✅ 生成完了: {generatedCard.name}
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">基本情報</h4>
@@ -176,7 +179,7 @@ const GeminiGenerator: React.FC<GeminiGeneratorProps> = ({ onCardGenerated }) =>
                 <strong>最初のメッセージ:</strong> {generatedCard.first_mes}
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">詳細</h4>
               <p className="text-sm text-gray-600 mb-2">

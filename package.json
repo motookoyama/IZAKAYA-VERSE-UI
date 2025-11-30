@@ -4,16 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 1398",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview --port 1398",
-    "start": "node server.cjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.10",
     "@types/react-router-dom": "^5.3.3",
-    "express": "^5.1.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",

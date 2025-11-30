@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Library as LibraryIcon, Download, Satellite, Plus, Link } from 'lucide-react'
 import GeminiGenerator from './GeminiGenerator'
 import MetaCapture from './MetaCapture'
+import { resolveBffBase } from '../lib/bff'
 
 interface V2Card {
   id: string
@@ -29,7 +30,8 @@ const Library = () => {
 
   const fetchCards = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/v2cards')
+      const bffBase = resolveBffBase();
+      const response = await fetch(`${bffBase}/api/v2cards`)
       if (response.ok) {
         const data = await response.json()
         setCards(data.cards || [])
@@ -44,7 +46,8 @@ const Library = () => {
   // 衛星アプリ結果取得
   const fetchSatelliteCards = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/satellite/metacapture')
+      const bffBase = resolveBffBase();
+      const response = await fetch(`${bffBase}/api/satellite/metacapture`)
       if (response.ok) {
         const data = await response.json()
         setCards(data.cards || [])
@@ -71,7 +74,7 @@ const Library = () => {
   const downloadCard = (card: V2Card, format: 'json' | 'sAtd') => {
     let content = ''
     let filename = `${card.title}.${format}`
-    
+
     if (format === 'json') {
       content = JSON.stringify(card.character_data || card, null, 2)
     } else {
@@ -82,7 +85,7 @@ const Library = () => {
         content += `first_mes: ${card.character_data.first_mes || ''}\n`
       }
     }
-    
+
     const blob = new Blob([content], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -118,7 +121,7 @@ const Library = () => {
             <LibraryIcon size={32} className="text-yellow-300" />
             <h1 className="text-3xl font-bold">📚 カードライブラリ</h1>
           </div>
-          
+
           <p className="text-lg mb-6">
             V2カードの一覧表示。ローカル生成と衛星アプリ（Gemini）からの結果を管理します。
           </p>
@@ -127,25 +130,22 @@ const Library = () => {
           <div className="flex gap-4 mb-4">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                filter === 'all' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors ${filter === 'all' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
+                }`}
             >
               すべて ({cards.length})
             </button>
             <button
               onClick={() => setFilter('local')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                filter === 'local' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors ${filter === 'local' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
+                }`}
             >
               ローカル ({cards.filter(c => !c.tags.includes('satellite')).length})
             </button>
             <button
               onClick={() => setFilter('satellite')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                filter === 'satellite' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors ${filter === 'satellite' ? 'bg-blue-600' : 'bg-white bg-opacity-20'
+                }`}
             >
               <Satellite size={16} className="inline mr-2" />
               衛星アプリ ({cards.filter(c => c.tags.includes('satellite')).length})
@@ -260,7 +260,7 @@ const Library = () => {
                       <LibraryIcon size={48} className="text-white" />
                     </div>
                   )}
-                  
+
                   {/* 衛星アプリバッジ */}
                   {card.tags.includes('satellite') && (
                     <div className="absolute top-2 right-2 bg-purple-600 px-2 py-1 rounded-full text-xs">

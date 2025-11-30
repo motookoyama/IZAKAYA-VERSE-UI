@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { resolveBffBase } from '../lib/bff';
 import { ChevronDown, User, Tag } from 'lucide-react';
 
 interface V2Card {
@@ -32,7 +33,8 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
 
   const fetchCards = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/v2cards');
+      const bffBase = resolveBffBase();
+      const response = await fetch(`${bffBase}/api/v2cards`);
       if (response.ok) {
         const data = await response.json();
         setCards(data.cards || []);
@@ -45,7 +47,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
   };
 
   // 検索フィルター
-  const filteredCards = cards.filter(card => 
+  const filteredCards = cards.filter(card =>
     card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (card.tags && card.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -62,7 +64,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
     const initials = card.title.substring(0, 2).toUpperCase();
     const colors = ['#3B82F6', '#8B5CF6', '#EF4444', '#10B981', '#F59E0B'];
     const color = colors[card.title.length % colors.length];
-    
+
     return (
       <svg width="32" height="32" viewBox="0 0 32 32" className="rounded-full">
         <rect width="32" height="32" fill={color} rx="16" />
@@ -113,9 +115,9 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
             </>
           )}
         </div>
-        <ChevronDown 
-          size={20} 
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+        <ChevronDown
+          size={20}
+          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -162,7 +164,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
                     ) : (
                       generateSVGIcon(card)
                     )}
-                    
+
                     {/* テキスト情報 */}
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-gray-800 truncate">
@@ -171,7 +173,7 @@ const V2CardSelector: React.FC<V2CardSelectorProps> = ({ onCardSelect, selectedC
                       <div className="text-sm text-gray-600 truncate">
                         {card.description}
                       </div>
-                      
+
                       {/* タグ */}
                       {card.tags && card.tags.length > 0 && (
                         <div className="flex gap-1 mt-1">
